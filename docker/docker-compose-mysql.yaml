@@ -39,6 +39,7 @@ services:
 
   conductor-mysql:
     image: mysql:latest
+    container_name: conductor-mysql
     environment:
       MYSQL_ROOT_PASSWORD: 12345
       MYSQL_DATABASE: conductor
@@ -60,6 +61,7 @@ services:
 
   conductor-redis:
     image: redis:6.2.3-alpine
+    container_name: conductor-redis
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     networks:
@@ -71,6 +73,7 @@ services:
 
   conductor-elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
+    container_name: conductor-elasticsearch
     environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx1024m"
       - xpack.security.enabled=false

@@ -39,6 +39,8 @@ WORKDIR conductor-community
 RUN ls -ltr
 
 # Build the server on run
+COPY ../gradle/wrapper/gradle-wrapper.properties gradle/wrapper
+#RUN ./gradlew -g .
 RUN ./gradlew build -x test --stacktrace
 WORKDIR /server-build
 RUN ls -ltr

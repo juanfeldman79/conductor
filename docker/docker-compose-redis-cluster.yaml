@@ -1,0 +1,263 @@
+version: '2.3'
+
+services:
+  conductor-server:
+    environment:
+      - CONFIG_PROP=config-redis-cluster.properties
+      # - LOGGING_LEVEL_ROOT=debug
+    image: conductor:server
+    container_name: conductor-server
+    build:
+      context: ../
+      dockerfile: docker/server/Dockerfile
+    networks:
+      - internal
+    volumes:
+      - ./server/config/config-redis-cluster.properties:/app/config/config-redis-cluster.properties
+    ports:
+      - 8080:8080
+      - 5000:5000
+    healthcheck:
+      test: ["CMD", "curl","-I" ,"-XGET", "http://localhost:8080/health"]
+      interval: 60s
+      timeout: 30s
+      retries: 12
+    links:
+      - conductor-elasticsearch:es
+      # - conductor-redis:rs
+      - redis-node-0:host0
+      - redis-node-1:host1
+      - redis-node-2:host2
+      - redis-node-3:host3
+      - redis-node-4:host4
+      - redis-node-5:host5
+    depends_on:
+      conductor-elasticsearch:
+        condition: service_healthy
+      # conductor-redis:
+      #   condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1k"
+        max-file: "3"
+
+  conductor-server2:
+    environment:
+      - CONFIG_PROP=config-redis-cluster.properties
+      # - LOGGING_LEVEL_ROOT=debug
+    image: conductor:server
+    container_name: conductor-server2
+    build:
+      context: ../
+      dockerfile: docker/server/Dockerfile
+    networks:
+      - internal
+    volumes:
+      - ./server/config/config-redis-cluster.properties:/app/config/config-redis-cluster.properties
+    ports:
+      - 8081:8080
+      - 5001:5000
+    healthcheck:
+      test: ["CMD", "curl","-I" ,"-XGET", "http://localhost:8080/health"]
+      interval: 60s
+      timeout: 30s
+      retries: 12
+    links:
+      - conductor-elasticsearch:es
+      - redis-node-0:host0
+      - redis-node-1:host1
+      - redis-node-2:host2
+      - redis-node-3:host3
+      - redis-node-4:host4
+      - redis-node-5:host5
+      # - conductor-redis:rs
+    depends_on:
+      conductor-elasticsearch:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1k"
+        max-file: "3"
+
+  conductor-server3:
+    environment:
+      - CONFIG_PROP=config-redis-cluster.properties
+      # - LOGGING_LEVEL_ROOT=debug
+    image: conductor:server
+    container_name: conductor-server3
+    build:
+      context: ../
+      dockerfile: docker/server/Dockerfile
+    networks:
+      - internal
+    volumes:
+      - ./server/config/config-redis-cluster.properties:/app/config/config-redis-cluster.properties
+    ports:
+      - 8082:8080
+      - 5002:5000
+    healthcheck:
+      test: ["CMD", "curl","-I" ,"-XGET", "http://localhost:8080/health"]
+      interval: 60s
+      timeout: 30s
+      retries: 12
+    links:
+      - conductor-elasticsearch:es
+      - redis-node-0:host0
+      - redis-node-1:host1
+      - redis-node-2:host2
+      - redis-node-3:host3
+      - redis-node-4:host4
+      - redis-node-5:host5
+      # - conductor-redis:rs
+    depends_on:
+      conductor-elasticsearch:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1k"
+        max-file: "3"
+
+  conductor-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
+    container_name: conductor-elasticsearch
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1024m"
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    volumes:
+      - esdata-conductor:/usr/share/elasticsearch/data
+    networks:
+      - internal
+    ports:
+      - 9201:9200
+    healthcheck:
+      test: curl http://localhost:9200/_cluster/health -o /dev/null
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1k"
+        max-file: "3"
+
+  redis-node-0:
+    image: docker.io/bitnami/redis-cluster:7.2
+    container_name: redis-node-0
+    ports:
+    - 7000:6379
+    networks:
+      - internal
+    volumes:
+      - redis-cluster_data-0:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+
+  redis-node-1:
+    image: docker.io/bitnami/redis-cluster:7.2
+    container_name: redis-node-1
+    ports:
+    - 7001:6379
+    networks:
+      - internal
+    volumes:
+      - redis-cluster_data-1:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+
+  redis-node-2:
+    image: docker.io/bitnami/redis-cluster:7.2
+    container_name: redis-node-2
+    ports:
+    - 7002:6379
+    networks:
+      - internal
+    volumes:
+      - redis-cluster_data-2:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+
+  redis-node-3:
+    image: docker.io/bitnami/redis-cluster:7.2
+    container_name: redis-node-3
+    ports:
+    - 7003:6379
+    networks:
+      - internal
+    volumes:
+      - redis-cluster_data-3:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+
+  redis-node-4:
+    image: docker.io/bitnami/redis-cluster:7.2
+    container_name: redis-node-4
+    ports:
+    - 7004:6379
+    networks:
+      - internal
+    volumes:
+      - redis-cluster_data-4:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+
+  redis-node-5:
+    image: docker.io/bitnami/redis-cluster:7.2
+    container_name: redis-node-5
+    ports:
+    - 7005:6379
+    networks:
+      - internal
+    volumes:
+      - redis-cluster_data-5:/bitnami/redis/data
+    depends_on:
+      - redis-node-0
+      - redis-node-1
+      - redis-node-2
+      - redis-node-3
+      - redis-node-4
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDISCLI_AUTH=bitnami'
+      - 'REDIS_CLUSTER_REPLICAS=1'
+      - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+      - 'REDIS_CLUSTER_CREATOR=yes'
+
+  # conductor-redis:
+  #   image: redis:6.2.3-alpine
+  #   container_name: conductor-redis
+  #   volumes:
+  #     - ./server/config/redis.conf:/usr/local/etc/redis/redis.conf
+  #   networks:
+  #     - internal
+  #   ports:
+  #     - 7379:6379
+  #   healthcheck:
+  #     test: [ "CMD", "redis-cli","ping" ]
+
+volumes:
+  esdata-conductor:
+    driver: local
+  redis-cluster_data-0:
+    driver: local
+  redis-cluster_data-1:
+    driver: local
+  redis-cluster_data-2:
+    driver: local
+  redis-cluster_data-3:
+    driver: local
+  redis-cluster_data-4:
+    driver: local
+  redis-cluster_data-5:
+    driver: local
+
+networks:
+  internal:
